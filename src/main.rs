@@ -86,12 +86,20 @@ fn main() {
 }
 
 fn min(series: &[f64]) -> Option<f64> {
+    if series.is_empty() {
+        return None
+    }
+
     series.iter()
         .cloned()
         .min_by(|a, b| a.partial_cmp(b).expect("Tried to compare a NaN"))
 }
 
 fn max(series: &[f64]) -> Option<f64> {
+    if series.is_empty() {
+        return None
+    }
+    
     series.iter()
         .cloned()
         .max_by(|a, b| a.partial_cmp(b).expect("Tried to compare a NaN"))
@@ -101,17 +109,23 @@ fn n_window_sma(n: usize, series: &[f64]) -> Option<Vec<f64>> {
     if series.is_empty() || n == 0 {
         return None;
     }
+
     let windows = series.windows(n);
-    let result : Vec<f64> = windows.map(|w| w.iter().fold(0.0f64, |x,y| x + y ) / n as f64).collect::<Vec<f64>>();
+    let result : Vec<f64> = windows.map(|w| w.iter().fold(0.0f64, |x,y| x + y ) / w.len() as f64).collect::<Vec<f64>>();
     return Some(result);
 }
 
 fn price_diff(series: &[f64]) -> Option<(f64, f64)> {
+    if series.is_empty() {
+        return None
+    }
+
     let last_closing_price = series.first();
     let first_closing_price = series.last();
     if last_closing_price == None || first_closing_price == None {
         return None
     }
+
     let delta_percentage = last_closing_price.unwrap() / first_closing_price.unwrap() * 100.0;
     let abs_difference = (first_closing_price.unwrap() - last_closing_price.unwrap()).abs();
     return Some((delta_percentage, abs_difference));
