@@ -21,6 +21,7 @@ fn main() {
                                 .takes_value(true),
                             Arg::with_name("symbols")
                                 .help("List of symbols to retrieve stock info from. Comma separated. Example GOOG,IBM")
+                                .long("symbols")
                                 .takes_value(true)
                           ])
                           .get_matches();
