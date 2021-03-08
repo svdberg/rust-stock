@@ -94,3 +94,42 @@ pub fn print_stats(from: DateTime<Utc>, symbol: &str, provider: &yahoo_finance_a
     }
     return Ok(())
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_price_diff() {
+        let sample: [f64; 5]  = [0.0, 20.0, 30.0, 40.0, 1000.0];
+        let target_absolute = 1000.0;
+        let target_relative = 1000.0;
+        let (absolute,relative) = price_diff(&sample).unwrap();
+        assert_eq!(absolute,target_absolute);
+        assert_eq!(relative,target_relative);
+    }
+
+    #[test]
+    fn test_price_diff_empty() {
+        let sub: [f64;0] = [];
+        let res = price_diff(&sub);
+        assert_eq!(res,None);
+    }
+
+    #[test]
+    fn test_min_max() {
+        let sample: [f64; 5]  = [0.0, 20.0, 30.0, 1000.0, 40.0];
+        let min = min(&sample).unwrap();
+        let max = max(&sample).unwrap();
+        assert_eq!(min, 0.0);
+        assert_eq!(max, 1000.0);
+    }
+
+    #[test]
+    fn test_n_window_sma() {
+        let sample: [f64; 5]  = [0.0, 20.0, 30.0, 40.0, 1000.0];
+        let smas = n_window_sma(2, &sample).unwrap();
+        assert_eq!(smas, vec![10.0, 25.0, 35.0, 520.0])
+    }
+}
