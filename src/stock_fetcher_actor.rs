@@ -1,4 +1,35 @@
 use chrono::prelude::*;
+use yahoo_finance_api as yahoo;
+use xactor::*;
+
+#[message]
+pub struct Update;
+
+pub struct StockActor {
+    from: DateTime<Utc>, 
+    symbol: String, 
+    provider: yahoo_finance_api::YahooConnector
+}
+
+impl StockActor {
+    pub fn new(from: DateTime<Utc>, symbol: String) -> StockActor {
+        let provider = yahoo::YahooConnector::new(); 
+        StockActor {
+            from,
+            symbol,
+            provider
+        }
+    }
+}
+
+impl Actor for StockActor {}
+
+#[async_trait::async_trait]
+impl Handler<Update> for StockActor {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Update) {
+        let _ = print_stats(self.from, self.symbol.as_str(), &self.provider).await;
+    }
+}
 
 ///
 /// Calculates the absolute and relative difference between the beginning and ending of an f64 series. The relative difference is relative to the beginning.
