@@ -9,4 +9,5 @@ version = "0.1.0"
 [dependencies]
 chrono = {version = "0.4", features = ["serde"]}
 clap = "3.0.0-beta.1"
-yahoo_finance_api = {version = "1.0.2", features = ["blocking"]}
+yahoo_finance_api = "1.0.2"
+async-std = {version = "1.9.0", features = ["attributes"]}

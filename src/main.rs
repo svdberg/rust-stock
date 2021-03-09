@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use clap::Clap;
 use yahoo_finance_api as yahoo;
+use async_std::prelude::*;
 
 mod stock_fetcher_actor;
 
@@ -22,8 +23,8 @@ struct Opts {
     from: String,
 }
 
-
-fn main() -> std::io::Result<()> {
+#[async_std::main]
+async fn main() -> std::io::Result<()> {
     let opts = Opts::parse();
     let from: DateTime<Utc> = opts.from.parse().expect("Couldn't parse 'from' date");
     let provider = yahoo::YahooConnector::new();
@@ -31,7 +32,7 @@ fn main() -> std::io::Result<()> {
     println!("period start,symbol,price,change %,min,max,30d avg");
 
     for symbol in opts.symbols.split(',') {
-        let _ = stock_fetcher_actor::print_stats(from, symbol, &provider);
+        let _ = stock_fetcher_actor::print_stats(from, symbol, &provider).await?;
     }
     Ok(())
 }

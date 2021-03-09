@@ -7,7 +7,7 @@ use chrono::prelude::*;
 ///
 /// A tuple `(absolute, relative)` difference.
 ///
-fn price_diff(a: &[f64]) -> Option<(f64, f64)> {
+async fn price_diff(a: &[f64]) -> Option<(f64, f64)> {
     if !a.is_empty() {
         // unwrap is safe here even if first == last
         let (first, last) = (a.first().unwrap(), a.last().unwrap());
@@ -23,7 +23,7 @@ fn price_diff(a: &[f64]) -> Option<(f64, f64)> {
 ///
 /// Window function to create a simple moving average
 ///
-fn n_window_sma(n: usize, series: &[f64]) -> Option<Vec<f64>> {
+async fn n_window_sma(n: usize, series: &[f64]) -> Option<Vec<f64>> {
     if !series.is_empty() && n > 1 {
         Some(
             series
@@ -39,7 +39,7 @@ fn n_window_sma(n: usize, series: &[f64]) -> Option<Vec<f64>> {
 ///
 /// Find the maximum in a series of f64
 ///
-fn max(series: &[f64]) -> Option<f64> {
+async fn max(series: &[f64]) -> Option<f64> {
     if series.is_empty() {
         None
     } else {
@@ -50,7 +50,7 @@ fn max(series: &[f64]) -> Option<f64> {
 ///
 /// Find the minimum in a series of f64
 ///
-fn min(series: &[f64]) -> Option<f64> {
+async fn min(series: &[f64]) -> Option<f64> {
     if series.is_empty() {
         None
     } else {
@@ -58,8 +58,10 @@ fn min(series: &[f64]) -> Option<f64> {
     }
 }
 
-pub fn print_stats(from: DateTime<Utc>, symbol: &str, provider: &yahoo_finance_api::YahooConnector) -> std::io::Result<()> {
-    if let Ok(response) = provider.get_quote_history(symbol, from, Utc::now()) {
+pub async fn print_stats(from: DateTime<Utc>, symbol: &str, provider: &yahoo_finance_api::YahooConnector) -> std::io::Result<()> {
+    let resp = provider.get_quote_history(symbol, from, Utc::now()).await;
+    
+    if let Ok(response) = resp  {
         match response.quotes() {
             Ok(mut quotes) => {
                 if !quotes.is_empty() {
@@ -67,11 +69,11 @@ pub fn print_stats(from: DateTime<Utc>, symbol: &str, provider: &yahoo_finance_a
                     let closes: Vec<f64> = quotes.iter().map(|q| q.adjclose as f64).collect();
                     if !closes.is_empty() {
                         // min/max of the period
-                        let period_max: f64 = max(&closes).unwrap();
-                        let period_min: f64 = min(&closes).unwrap();
+                        let period_max: f64 = max(&closes).await.unwrap();
+                        let period_min: f64 = min(&closes).await.unwrap();
                         let last_price = *closes.last().unwrap_or(&0.0);
-                        let (_, pct_change) = price_diff(&closes).unwrap_or((0.0, 0.0));
-                        let sma = n_window_sma(30, &closes).unwrap_or_default();
+                        let (_, pct_change) = price_diff(&closes).await.unwrap_or((0.0, 0.0));
+                        let sma = n_window_sma(30, &closes).await.unwrap_or_default();
                         println!(
                             "{},{},${:.2},{:.2}%,${:.2},${:.2},${:.2}",
                             from.to_rfc3339(),
@@ -100,36 +102,40 @@ pub fn print_stats(from: DateTime<Utc>, symbol: &str, provider: &yahoo_finance_a
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_price_diff() {
+    #[async_std::test]
+
+    async fn test_price_diff() {
         let sample: [f64; 5]  = [0.0, 20.0, 30.0, 40.0, 1000.0];
         let target_absolute = 1000.0;
         let target_relative = 1000.0;
-        let (absolute,relative) = price_diff(&sample).unwrap();
+        let (absolute,relative) = price_diff(&sample).await.unwrap();
         assert_eq!(absolute,target_absolute);
         assert_eq!(relative,target_relative);
     }
 
-    #[test]
-    fn test_price_diff_empty() {
+    #[async_std::test]
+
+    async fn test_price_diff_empty() {
         let sub: [f64;0] = [];
-        let res = price_diff(&sub);
+        let res = price_diff(&sub).await;
         assert_eq!(res,None);
     }
 
-    #[test]
-    fn test_min_max() {
+    #[async_std::test]
+
+    async fn test_min_max() {
         let sample: [f64; 5]  = [0.0, 20.0, 30.0, 1000.0, 40.0];
-        let min = min(&sample).unwrap();
-        let max = max(&sample).unwrap();
+        let min = min(&sample).await.unwrap();
+        let max = max(&sample).await.unwrap();
         assert_eq!(min, 0.0);
         assert_eq!(max, 1000.0);
     }
 
-    #[test]
-    fn test_n_window_sma() {
+    #[async_std::test]
+
+    async fn test_n_window_sma() {
         let sample: [f64; 5]  = [0.0, 20.0, 30.0, 40.0, 1000.0];
-        let smas = n_window_sma(2, &sample).unwrap();
+        let smas = n_window_sma(2, &sample).await.unwrap();
         assert_eq!(smas, vec![10.0, 25.0, 35.0, 520.0])
     }
 }
