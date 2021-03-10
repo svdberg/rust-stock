@@ -1,8 +1,10 @@
 use chrono::prelude::*;
 use yahoo_finance_api as yahoo;
 use xactor::*;
+use std::time::Duration;
 
 #[message]
+#[derive(Clone)]
 pub struct Update;
 
 pub struct StockActor {
@@ -22,12 +24,28 @@ impl StockActor {
     }
 }
 
-impl Actor for StockActor {}
+#[async_trait::async_trait]
+impl Actor for StockActor {
+    async fn started(&mut self, ctx: &mut Context<Self>) -> xactor::Result<()> {
+        ctx.send_interval(Update, Duration::from_secs(30));
+        Ok(())
+    }
+}
 
 #[async_trait::async_trait]
 impl Handler<Update> for StockActor {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Update) {
         let _ = print_stats(self.from, self.symbol.as_str(), &self.provider).await;
+    }
+}
+
+#[message]
+pub struct Halt;
+
+#[async_trait::async_trait]
+impl Handler<Halt> for StockActor {
+    async fn handle(&mut self, ctx: &mut Context<Self>, _msg: Halt) {
+        ctx.stop(None);
     }
 }
 
