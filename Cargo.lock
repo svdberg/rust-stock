@@ -301,6 +301,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "chrono",
+ "clap",
+ "stock-stats",
+ "xactor",
+ "yahoo_finance_api",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -774,18 +787,6 @@ name = "memchr"
 version = "2.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
-
-[[package]]
-name = "milestone-2"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "async-trait",
- "chrono",
- "clap",
- "xactor",
- "yahoo_finance_api",
-]
 
 [[package]]
 name = "mime"
@@ -1332,6 +1333,18 @@ name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
+
+[[package]]
+name = "stock-stats"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "chrono",
+ "clap",
+ "xactor",
+ "yahoo_finance_api",
+]
 
 [[package]]
 name = "strsim"

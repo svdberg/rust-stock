@@ -5,10 +5,7 @@ use clap::Clap;
 use std::time::Duration;
 use xactor::*;
 use yahoo_finance_api as yahoo;
-
-mod utils;
-
-use utils::{max, min, n_window_sma, price_diff, fetch_ticker_data};
+use stock_stats::{max, min, n_window_sma, price_diff, fetch_ticker_data};
 
 #[derive(Clap)]
 #[clap(
@@ -42,7 +39,7 @@ pub struct StockDataDownloader;
 
 #[async_trait::async_trait]
 impl Handler<QuoteRequest> for StockDataDownloader {
-  async fn handle(&mut self, _ctx: &Context<Self>, msg: QuoteRequest) {
+  async fn handle(&mut self, _ctx: &mut Context<Self>, msg: QuoteRequest) {
     let symbol = msg.symbol.clone();
     // 1h interval works for larger time periods as well (months/years)
     let data = match fetch_ticker_data(msg.symbol, msg.from, msg.to, String::from("1h")).await {
@@ -76,7 +73,7 @@ struct StockDataProcessor;
 
 #[async_trait::async_trait]
 impl Handler<Quotes> for StockDataProcessor {
-  async fn handle(&mut self, _ctx: &Context<Self>, mut msg: Quotes) {
+  async fn handle(&mut self, _ctx: &mut Context<Self>, mut msg: Quotes) {
     let data = msg.quotes.as_mut_slice();
     if !data.is_empty() {
 
