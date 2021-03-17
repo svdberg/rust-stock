@@ -10,8 +10,8 @@ use stock_stats::{max, min, n_window_sma, price_diff, fetch_ticker_data};
 #[derive(Clap)]
 #[clap(
   version = "1.0",
-  author = "Claus Matzinger",
-  about = "Milestone 2: working with actors"
+  author = "Sander van den Berg",
+  about = "Milestone 3: Crossing platform boundaries"
 )]
 struct Opts {
   #[clap(short, long, default_value = "AAPL,MSFT,UBER,GOOG")]
